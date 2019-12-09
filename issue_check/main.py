@@ -19,6 +19,7 @@ Validação manual:
 """
 import re
 import requests
+import pdb
 from lxml import etree
 
 
@@ -36,10 +37,11 @@ SCRIPT_URL = {
 if __name__ == "__main__":
 
     # Ler o arquivo do scilista.lst
-    fp = open('scilista.lst', 'r')
+    fp = open('/Users/franklin.ribeiro/Documents/aulas_python/issue_check/scilista.lst', 'r')
 
     issns = []  # Periódicos encontrados
     j_not_found = []  # Periódicos não encontrados
+    dic_teste = [{}]
 
     # Obtém os issns
     for line in fp.readlines():
@@ -51,36 +53,51 @@ if __name__ == "__main__":
             issns.append(issn.group())
         else:
             j_not_found.append(acron)
+            print('Acrônimos não encontrados:')
+            print(j_not_found)
+            
 
-    # [
-    #   {
-    #   'ano': 2001, 'vol': 1,
-    #   'nums': [
-    #             {'number': 1, 'link': ''},
-    #           ]
-    #   }
-    # ]
+        # [
+        #   {
+        #   'ano': 2001, 'vol': 1,
+        #   'nums': [
+        #             {'number': 1, 'link': ''},
+        #           ]
+        #   }
+        # ]
 
-    dict_issue = {}
+        #dic_teste = [{'acr':'%s','year':'%s','vol':['%s', '%s']}] 
 
-    # Verifica o fascículo na grade
-    for issn in issns:
-        url_segment = URL_SEGMENT % (SCRIPT_URL['grid'], issn)
-        ret = requests.get("%s%s/%s" % (PROTOCOL, DOMAIN, url_segment))
+        
+        dic_teste.append(acron) 
+        print(dic_teste)
+        
+  
 
-        tree = etree.fromstring(ret.content)
-        issues = tree.xpath("//AVAILISSUES")[0]
+        #dict_issue = {}
 
-        # YEARISSUE
-        for issue in issues:
-            # ANO
-            print(issue.values())
-            # VOLISSUE
-            for vol_issue in issue:
-                # Volume
-                print(vol_issue.values())
+        # Verifica o fascículo na grade
+        for issn in issns:
+            url_segment = URL_SEGMENT % (SCRIPT_URL['grid'], issn)
+            ret = requests.get("%s%s/%s" % (PROTOCOL, DOMAIN, url_segment))
 
-                for number in vol_issue:
-                    if number.values():
+            tree = etree.fromstring(ret.content)
+            issues = tree.xpath("//AVAILISSUES")[0]
 
-                        print(number.values())
+            # YEARISSUE
+            
+            for issue in issues:
+                # ANO
+                
+                #print(issue.values())
+        
+                # VOLISSUE
+                for vol_issue in issue:
+                    # Volume
+                    dic_teste.update({'year':issue.values()})
+                    dic_teste.update({'vol':vol_issue.values()})
+                
+                    #for number in vol_issue:
+                    #if number.values():
+                    print(dic_teste)
+                        
