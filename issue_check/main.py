@@ -93,20 +93,21 @@ if __name__ == "__main__":
                 # ANO
                 
                 #print(issue.values())
-                num_list = []         
+                num_list = [] 
 
                 # VOLISSUE
                 for vol_issue in issue:
                     # Volume
+                    
                     current_dict["ano"] = issue.values()[0]
                     current_dict["vol"] = vol_issue.values()[0]
-                    
+
                     #NUMS
                     for number in vol_issue:
 
                         if number.values():
                             num = {}
-                            
+
                             if len(number.values()) > 2:
                                 num['num'] = number.values()[0]
                                 num['link'] = number.values()[2]
