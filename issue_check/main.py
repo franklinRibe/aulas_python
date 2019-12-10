@@ -22,6 +22,7 @@ import requests
 import pdb
 from lxml import etree
 import os
+from pprint import pprint
 
 
 REGEX_ISSN = r'[\S]{4}\-[\S]{4}'
@@ -40,10 +41,11 @@ if __name__ == "__main__":
     # Ler o arquivo do scilista.lst
     os_path = os.path.join(os.path.dirname(__file__), "scilista.lst")
     fp = open(os_path, 'r')
- 
+
     issns = []  # Periódicos encontrados
     j_not_found = []  # Periódicos não encontrados
-    dic_teste = []
+    revistas = []
+    journal_list = []
 
     # Obtém os issns
     for line in fp.readlines():
@@ -61,20 +63,20 @@ if __name__ == "__main__":
 
         # [
         #   {
-        #   'ano': 2001, 'vol': 1,
+        #   'acron': 'bjmbr',
+        #   'ano': 2001,
+        #   'vol': 1,
         #   'nums': [
-        #             {'number': 1, 'link': ''},
+        #             {'number': 1, 'link': 'http://blaus'},
         #           ]
-        #   }
+        #   },
         # ]
 
         #dic_teste = [{'acr':'%s','year':'%s','vol':['%s', '%s']}] 
 
-        
-        dic_teste.append(acron) 
-        print(dic_teste)
-        
-  
+        # dic_teste = [{'acr':'','ano':'','vol':'','num':'','link':''}]
+
+        current_dict = {'acron': acron}
 
         #dict_issue = {}
 
@@ -87,19 +89,36 @@ if __name__ == "__main__":
             issues = tree.xpath("//AVAILISSUES")[0]
 
             # YEARISSUE
-            
             for issue in issues:
                 # ANO
                 
                 #print(issue.values())
-        
+                num_list = []         
+
                 # VOLISSUE
                 for vol_issue in issue:
                     # Volume
-                    dic_teste.update({'year':issue.values()})
-                    dic_teste.update({'vol':vol_issue.values()})
-                
-                    #for number in vol_issue:
-                    #if number.values():
-                    print(dic_teste)
-                        
+                    current_dict["ano"] = issue.values()[0]
+                    current_dict["vol"] = vol_issue.values()[0]
+                    
+                    #NUMS
+                    for number in vol_issue:
+
+                        if number.values():
+                            num = {}
+                            
+                            if len(number.values()) > 2:
+                                num['num'] = number.values()[0]
+                                num['link'] = number.values()[2]
+                                # current_dict["num"] = number.values()[0]
+                                # current_dict["link"] = number.values()[2]
+                            else:
+                                num['link'] = number.values()[1]
+                                # current_dict["link"] = number.values()[1]
+                        num_list.append(num)
+
+            current_dict['nums'] = num_list    
+
+        journal_list.append(current_dict)
+
+pprint(journal_list)
