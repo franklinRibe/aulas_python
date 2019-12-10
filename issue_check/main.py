@@ -21,6 +21,7 @@ import re
 import requests
 import pdb
 from lxml import etree
+import os
 
 
 REGEX_ISSN = r'[\S]{4}\-[\S]{4}'
@@ -37,11 +38,12 @@ SCRIPT_URL = {
 if __name__ == "__main__":
 
     # Ler o arquivo do scilista.lst
-    fp = open('/Users/franklin.ribeiro/Documents/aulas_python/issue_check/scilista.lst', 'r')
-
+    os_path = os.path.join(os.path.dirname(__file__), "scilista.lst")
+    fp = open(os_path, 'r')
+ 
     issns = []  # Periódicos encontrados
     j_not_found = []  # Periódicos não encontrados
-    dic_teste = [{}]
+    dic_teste = []
 
     # Obtém os issns
     for line in fp.readlines():
