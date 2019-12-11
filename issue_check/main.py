@@ -59,22 +59,6 @@ if __name__ == "__main__":
             j_not_found.append(acron)
             print('Acrônimos não encontrados:')
             print(j_not_found)
-            
-
-        # [
-        #   {
-        #   'acron': 'bjmbr',
-        #   'ano': 2001,
-        #   'vol': 1,
-        #   'nums': [
-        #             {'number': 1, 'link': 'http://blaus'},
-        #           ]
-        #   },
-        # ]
-
-        #dic_teste = [{'acr':'%s','year':'%s','vol':['%s', '%s']}] 
-
-        # dic_teste = [{'acr':'','ano':'','vol':'','num':'','link':''}]
 
         current_dict = {'acron': acron}
 
@@ -84,42 +68,85 @@ if __name__ == "__main__":
         for issn in issns:
             url_segment = URL_SEGMENT % (SCRIPT_URL['grid'], issn)
             ret = requests.get("%s%s/%s" % (PROTOCOL, DOMAIN, url_segment))
-
             tree = etree.fromstring(ret.content)
             issues = tree.xpath("//AVAILISSUES")[0]
+            
+            #Dicionários usados nos laços para criaçao do dicionário principal
+            ano_dic = {}
+            vols_dic = {}
+            num_dic = {}
 
+
+            for year_issue in issues:
+                if year_issue.values():
+                    ano_dic["ano"] = year_issue.values()[0]
+                    current_dict["year"] = [ano_dic]
+
+                    for vols in year_issue:
+                        vols_dic["vol"] = vols.values()[0]
+                        ano_dic["volume"] = [vols_dic]
+                        
+                        num_list = []
+                        for nums in vols:
+                            
+                            if nums.values():
+                                
+                                if len(nums.values()) > 2:
+                                
+                                    num_dic["num"] = nums.values()[0]
+                                    num_dic["pid"] = nums.values()[2]
+                                else:
+                                    num_dic["pid"] = nums.values()[1]
+                                    num_dic["num"] = 'null'
+                            num_list.append(num_dic)
+                        journal_list.append(num_list) 
+                        pprint(journal_list)
+                        pdb.set_trace()
+
+                        vols_dic["issues"] = [num_dic]
+
+                                
+                              
+                            
+
+"""                               
+            
             # YEARISSUE
-            for issue in issues:
+            for year_issue in issues:
                 # ANO
-                
-                #print(issue.values())
-                num_list = [] 
-
-                # VOLISSUE
-                for vol_issue in issue:
-                    # Volume
+                    ano_dic = {}
                     
-                    current_dict["ano"] = issue.values()[0]
-                    current_dict["vol"] = vol_issue.values()[0]
+                    # VOLISSUE
+                    for vol_issue in issue:
+                        # Volume
+                        
+                        current_dict["ano"] = issue.values()[0]
+                        current_dict["vol"] = vol_issue.values()[0]
 
-                    #NUMS
-                    for number in vol_issue:
+                        #NUMS
+                        for number in vol_issue:
+                            
 
-                        if number.values():
-                            num = {}
 
-                            if len(number.values()) > 2:
-                                num['num'] = number.values()[0]
-                                num['link'] = number.values()[2]
-                                # current_dict["num"] = number.values()[0]
-                                # current_dict["link"] = number.values()[2]
-                            else:
-                                num['link'] = number.values()[1]
-                                # current_dict["link"] = number.values()[1]
-                        num_list.append(num)
+                            if number.values():
+                                num = {}
+
+                                if len(number.values()) > 2:
+                                    num['num'] = number.values()[0]
+                                    num['pid'] = number.values()[2]
+                                else:
+                                    num['pid'] = number.values()[1]
+                            
+                                    
+                            num_list.append(num)
 
             current_dict['nums'] = num_list    
 
         journal_list.append(current_dict)
 
 pprint(journal_list)
+"""
+
+
+
+
