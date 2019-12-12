@@ -35,17 +35,14 @@ SCRIPT_URL = {
                 'article': 'sci_arttext'
              }
 
-
 if __name__ == "__main__":
 
     # Ler o arquivo do scilista.lst
     os_path = os.path.join(os.path.dirname(__file__), "scilista.lst")
     fp = open(os_path, 'r')
 
-    issns = []  # Periódicos encontrados
     j_not_found = []  # Periódicos não encontrados
-    revistas = []
-    journal_list = []
+    journal_list = [] # Periódicos encontrados
 
     # Obtém os issns
     for line in fp.readlines():
@@ -53,100 +50,53 @@ if __name__ == "__main__":
         ret = requests.get("%s%s/%s" % (PROTOCOL, DOMAIN, acron))
 
         if ret.status_code == 200:
-            issn = re.search(REGEX_ISSN, ret.url)
-            issns.append(issn.group())
+            issn = re.search(REGEX_ISSN, ret.url).group()
         else:
             j_not_found.append(acron)
             print('Acrônimos não encontrados:')
             print(j_not_found)
 
-        current_dict = {'acron': acron}
-
-        #dict_issue = {}
-
         # Verifica o fascículo na grade
-        for issn in issns:
-            url_segment = URL_SEGMENT % (SCRIPT_URL['grid'], issn)
-            ret = requests.get("%s%s/%s" % (PROTOCOL, DOMAIN, url_segment))
-            tree = etree.fromstring(ret.content)
-            issues = tree.xpath("//AVAILISSUES")[0]
-            
-            #Dicionários usados nos laços para criaçao do dicionário principal
-            ano_dic = {}
-            vols_dic = {}
-            num_dic = {}
+        url_segment = URL_SEGMENT % (SCRIPT_URL['grid'], issn)
+        ret = requests.get("%s%s/%s" % (PROTOCOL, DOMAIN, url_segment))
+        tree = etree.fromstring(ret.content)
+        issues = tree.xpath("//AVAILISSUES")[0]
+        
+        #Dicionários usados nos laços para criaçao do dicionário principal
 
+        for year_issue in issues:
+            current_dict = {}
 
-            for year_issue in issues:
-                if year_issue.values():
-                    ano_dic["ano"] = year_issue.values()[0]
-                    current_dict["year"] = [ano_dic]
-
-                    for vols in year_issue:
-                        vols_dic["vol"] = vols.values()[0]
-                        ano_dic["volume"] = [vols_dic]
-                        
-                        num_list = []
-                        for nums in vols:
-                            
-                            if nums.values():
-                                
-                                if len(nums.values()) > 2:
-                                
-                                    num_dic["num"] = nums.values()[0]
-                                    num_dic["pid"] = nums.values()[2]
-                                else:
-                                    num_dic["pid"] = nums.values()[1]
-                                    num_dic["num"] = 'null'
-                            num_list.append(num_dic)
-                        journal_list.append(num_list) 
-                        pprint(journal_list)
-                        pdb.set_trace()
-
-                        vols_dic["issues"] = [num_dic]
-
-                                
-                              
-                            
-
-"""                               
-            
-            # YEARISSUE
-            for year_issue in issues:
-                # ANO
-                    ano_dic = {}
+            if year_issue.values():
+                for vols in year_issue:
+                    num_list = []
+                    current_dict["acron"] = acron
+                    current_dict["vol"] = vols.values()[0]
                     
-                    # VOLISSUE
-                    for vol_issue in issue:
-                        # Volume
-                        
-                        current_dict["ano"] = issue.values()[0]
-                        current_dict["vol"] = vol_issue.values()[0]
+                    for nums in vols:
+                        if nums.values():
+                            num_dic = {}
+                            if len(nums.values()) > 2:
+                                
+                                num_dic["num"] = nums.values()[0]
+                                num_dic["pid"] = nums.values()[2]      
+                            else:
+                                num_dic["num"] = 'Null'
+                                num_dic["pid"] = nums.values()[1]
 
-                        #NUMS
-                        for number in vol_issue:
-                            
+                            num_list.append(num_dic)
+                            current_dict["numero"] = num_list
+               
+                journal_list.append(current_dict)
+        pprint(journal_list)
+        #print(journal_list[3]['pid'])
+        pdb.set_trace()
+        """
+        Acessando as URLs baseadas nas listagens criadas
+        
+        pid = journal_list
+        url_segment_toc = URL_SEGMENT % (SCRIPT_URL['toc'], pid)
+        ret = requests.get("%s%s/%s" % (PROTOCOL, DOMAIN, url_segment_toc))
+        """ 
 
-
-                            if number.values():
-                                num = {}
-
-                                if len(number.values()) > 2:
-                                    num['num'] = number.values()[0]
-                                    num['pid'] = number.values()[2]
-                                else:
-                                    num['pid'] = number.values()[1]
-                            
-                                    
-                            num_list.append(num)
-
-            current_dict['nums'] = num_list    
-
-        journal_list.append(current_dict)
-
-pprint(journal_list)
-"""
-
-
-
-
+        
