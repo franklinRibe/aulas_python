@@ -49,6 +49,14 @@ if __name__ == "__main__":
         acron, issue_label = line.split()
         ret = requests.get("%s%s/%s" % (PROTOCOL, DOMAIN, acron))
 
+        pdb.set_trace()
+        
+        if issue_label.values():
+            index_numero = issue_label.index('n')
+            volume = issue_label[ :index_numero]
+            numero = issue_label[index_numero: ]
+            
+
         if ret.status_code == 200:
             issn = re.search(REGEX_ISSN, ret.url).group()
         else:
@@ -89,12 +97,13 @@ if __name__ == "__main__":
                
                 journal_list.append(current_dict)
         pprint(journal_list)
-        #print(journal_list[3]['pid'])
-        pdb.set_trace()
+       
+       
         """
         Acessando as URLs baseadas nas listagens criadas
         
-        pid = journal_list
+        pid = journal_list[1]['numero'][1]['pid']
+
         url_segment_toc = URL_SEGMENT % (SCRIPT_URL['toc'], pid)
         ret = requests.get("%s%s/%s" % (PROTOCOL, DOMAIN, url_segment_toc))
         """ 
